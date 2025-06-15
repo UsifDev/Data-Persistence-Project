@@ -1,9 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 public class MainManager : MonoBehaviour
 {
     public Brick BrickPrefab;
@@ -18,14 +19,20 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    public Text bestScoreAndNameText;
+    public string currName = "";
+    public string playerName = "Name";
+    public int highScore = 0;
+    public InputField nameInput;
+    public bool hasEnteredName = false;
+
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,13 +43,32 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        hasEnteredName = DataManager.Instance.hasEnteredName;
+        playerName = DataManager.Instance.playerName;
+        highScore = DataManager.Instance.highScore;
+        bestScoreAndNameText.text = "Best Score: " + playerName + " : " + highScore;
+
+        if (!hasEnteredName)
+        {
+            nameInput.gameObject.SetActive(true);
+            nameInput.ActivateInputField();
+        }
+    }
+
+    public void SubmitName(string name)
+    {
+        currName = nameInput.text;
+        hasEnteredName = true;
+        DataManager.Instance.hasEnteredName = true;
+        nameInput.gameObject.SetActive(false);
     }
 
     private void Update()
     {
         if (!m_Started)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space) && hasEnteredName)
             {
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
@@ -58,14 +84,38 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            } else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Exit();
             }
         }
     }
+
+    public void Exit()
+    {
+        DataManager.Instance.SaveInfo();
+
+#if UNITY_EDITOR
+        EditorApplication.ExitPlaymode();
+#else
+        Application.Quit();
+#endif
+    }
+
 
     void AddPoint(int point)
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+
+        // change highscore and the name of the score holder to this new name and score
+        if(m_Points > highScore){
+            playerName = currName;
+            highScore = m_Points;
+            DataManager.Instance.playerName = playerName;
+            DataManager.Instance.highScore = highScore;
+            bestScoreAndNameText.text = "Best Score: " + playerName + " : " + highScore;
+        }
     }
 
     public void GameOver()
@@ -73,4 +123,6 @@ public class MainManager : MonoBehaviour
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+
 }
