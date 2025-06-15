@@ -20,11 +20,7 @@ public class MainManager : MonoBehaviour
     private bool m_GameOver = false;
 
     public Text bestScoreAndNameText;
-    public string currName = "";
-    public string playerName = "Name";
-    public int highScore = 0;
     public InputField nameInput;
-    public bool hasEnteredName = false;
 
     // Start is called before the first frame update
     void Start()
@@ -44,12 +40,9 @@ public class MainManager : MonoBehaviour
             }
         }
 
-        hasEnteredName = DataManager.Instance.hasEnteredName;
-        playerName = DataManager.Instance.playerName;
-        highScore = DataManager.Instance.highScore;
-        bestScoreAndNameText.text = "Best Score: " + playerName + " : " + highScore;
+        bestScoreAndNameText.text = "Best Score: " + DataManager.Instance.playerName + " : " + DataManager.Instance.highScore;
 
-        if (!hasEnteredName)
+        if (!DataManager.Instance.hasEnteredName)
         {
             nameInput.gameObject.SetActive(true);
             nameInput.ActivateInputField();
@@ -58,8 +51,7 @@ public class MainManager : MonoBehaviour
 
     public void SubmitName(string name)
     {
-        currName = nameInput.text;
-        hasEnteredName = true;
+        DataManager.Instance.currName = nameInput.text;
         DataManager.Instance.hasEnteredName = true;
         nameInput.gameObject.SetActive(false);
     }
@@ -68,7 +60,7 @@ public class MainManager : MonoBehaviour
     {
         if (!m_Started)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && hasEnteredName)
+            if (Input.GetKeyDown(KeyCode.Space) && DataManager.Instance.hasEnteredName)
             {
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
@@ -109,12 +101,11 @@ public class MainManager : MonoBehaviour
         ScoreText.text = $"Score : {m_Points}";
 
         // change highscore and the name of the score holder to this new name and score
-        if(m_Points > highScore){
-            playerName = currName;
-            highScore = m_Points;
-            DataManager.Instance.playerName = playerName;
-            DataManager.Instance.highScore = highScore;
-            bestScoreAndNameText.text = "Best Score: " + playerName + " : " + highScore;
+        if(m_Points > DataManager.Instance.highScore)
+        {
+            DataManager.Instance.playerName = DataManager.Instance.currName;
+            DataManager.Instance.highScore = m_Points;
+            bestScoreAndNameText.text = "Best Score: " + DataManager.Instance.playerName + " : " + DataManager.Instance.highScore;
         }
     }
 

@@ -2,8 +2,8 @@ using System.IO;
 using UnityEngine;
 
 public class DataManager : MonoBehaviour
-
 {
+    public string currName = "";
     public string playerName = "Name";
     public int highScore = 0;
     public bool hasEnteredName = false;
@@ -25,6 +25,7 @@ public class DataManager : MonoBehaviour
         hasEnteredName = DataManager.Instance.hasEnteredName;
         playerName = DataManager.Instance.playerName;
         highScore = DataManager.Instance.highScore;
+        currName = DataManager.Instance.currName;
     }
 
     [System.Serializable]
